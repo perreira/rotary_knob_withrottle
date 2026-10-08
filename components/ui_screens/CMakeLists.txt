@@ -6,3 +6,5 @@ idf_component_register(
          "screen_settings.cpp" "screen_provisioning.cpp" "list_widget.cpp" "train_fn_screen.cpp"
     INCLUDE_DIRS "include"
     REQUIRES ui withrottle_client loco_ref withrottle recents wifi battery_bsp esp_app_format jmri_discovery netprov)
+
+target_compile_options(${COMPONENT_LIB} PRIVATE -Wno-deprecated-enum-enum-conversion)

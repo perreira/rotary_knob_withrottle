@@ -324,8 +324,6 @@ static void touch_reader_task(void* arg)
     uint32_t failed_reads = 0;
     uint32_t last_valid_x = 0, last_valid_y = 0;
     uint32_t cycles_count    = 0;
-    uint32_t last_print_time = esp_timer_get_time() / 1000;
-
     ESP_LOGI(TAG, "Touch reader task started");
 
     while (1)
@@ -399,7 +397,7 @@ static void touch_reader_task(void* arg)
 
 static void screen_lvgl_touch_cb(lv_indev_drv_t* drv, lv_indev_data_t* data)
 {
-    static touch_event_t last_event = {0, 0, LV_INDEV_STATE_RELEASED, true};
+    static touch_event_t last_event = {0, 0, LV_INDEV_STATE_RELEASED, true, 0};
     touch_event_t        current_event;
 
     // Try to get latest touch event from queue
@@ -527,20 +525,28 @@ void display_init(void)
     lcd_bl_pwm_bsp_init(LCD_PWM_MODE_0);
 
     ESP_LOGI(TAG, "Initialize SPI bus");
-    const spi_bus_config_t buscfg = {
-        .data0_io_num    = EXAMPLE_PIN_NUM_LCD_DATA0,
-        .data1_io_num    = EXAMPLE_PIN_NUM_LCD_DATA1,
-        .sclk_io_num     = EXAMPLE_PIN_NUM_LCD_PCLK,
-        .data2_io_num    = EXAMPLE_PIN_NUM_LCD_DATA2,
-        .data3_io_num    = EXAMPLE_PIN_NUM_LCD_DATA3,
-        .max_transfer_sz = EXAMPLE_LCD_H_RES * EXAMPLE_LCD_V_RES * sizeof(uint16_t),
-    };
+    spi_bus_config_t buscfg = {};
+    buscfg.data0_io_num    = EXAMPLE_PIN_NUM_LCD_DATA0;
+    buscfg.data1_io_num    = EXAMPLE_PIN_NUM_LCD_DATA1;
+    buscfg.sclk_io_num     = EXAMPLE_PIN_NUM_LCD_PCLK;
+    buscfg.data2_io_num    = EXAMPLE_PIN_NUM_LCD_DATA2;
+    buscfg.data3_io_num    = EXAMPLE_PIN_NUM_LCD_DATA3;
+    buscfg.max_transfer_sz = EXAMPLE_LCD_H_RES * EXAMPLE_LCD_V_RES * sizeof(uint16_t);
     ESP_ERROR_CHECK(spi_bus_initialize(LCD_HOST, &buscfg, SPI_DMA_CH_AUTO));
 
     ESP_LOGI(TAG, "Install panel IO");
     esp_lcd_panel_io_handle_t           io_handle = NULL;
-    const esp_lcd_panel_io_spi_config_t io_config = SH8601_PANEL_IO_QSPI_CONFIG(
-        EXAMPLE_PIN_NUM_LCD_CS, example_notify_lvgl_flush_ready, &disp_drv);
+    esp_lcd_panel_io_spi_config_t io_config = {};
+    io_config.cs_gpio_num = static_cast<gpio_num_t>(EXAMPLE_PIN_NUM_LCD_CS);
+    io_config.dc_gpio_num = static_cast<gpio_num_t>(-1);
+    io_config.spi_mode = 0;
+    io_config.pclk_hz = 40 * 1000 * 1000;
+    io_config.trans_queue_depth = 10;
+    io_config.on_color_trans_done = example_notify_lvgl_flush_ready;
+    io_config.user_ctx = &disp_drv;
+    io_config.lcd_cmd_bits = 32;
+    io_config.lcd_param_bits = 8;
+    io_config.flags.quad_mode = true;
     sh8601_vendor_config_t vendor_config = {
         .init_cmds      = lcd_init_cmds,
         .init_cmds_size = sizeof(lcd_init_cmds) / sizeof(lcd_init_cmds[0]),

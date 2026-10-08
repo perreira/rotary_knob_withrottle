@@ -122,13 +122,9 @@ static int cmd_do_sta_connect(int argc, char** argv)
         return 1;
     }
 
-    wifi_config_t wifi_config = {
-        .sta =
-            {
-                .scan_method = WIFI_ALL_CHANNEL_SCAN,
-                .sort_method = WIFI_CONNECT_AP_BY_SIGNAL,
-            },
-    };
+    wifi_config_t wifi_config{};
+    wifi_config.sta.scan_method = WIFI_ALL_CHANNEL_SCAN;
+    wifi_config.sta.sort_method = WIFI_CONNECT_AP_BY_SIGNAL;
 
     const char* ssid = connect_args.ssid->sval[0];
     memcpy((char*) wifi_config.sta.ssid, ssid, sizeof(wifi_config.sta.ssid));
@@ -158,11 +154,12 @@ static void register_sta_connect(void)
     connect_args.password       = arg_str0(NULL, NULL, "<pass>", "password of AP");
     connect_args.channel        = arg_int0("n", "channel", "<channel>", "channel of AP");
     connect_args.end            = arg_end(2);
-    const esp_console_cmd_t cmd = {.command  = "sta_connect",
-                                   .help     = "WiFi is station mode, join specified soft-AP",
-                                   .hint     = NULL,
-                                   .func     = &cmd_do_sta_connect,
-                                   .argtable = &connect_args};
+    esp_console_cmd_t cmd{};
+    cmd.command  = "sta_connect";
+    cmd.help     = "WiFi is station mode, join specified soft-AP";
+    cmd.hint     = NULL;
+    cmd.func     = &cmd_do_sta_connect;
+    cmd.argtable = &connect_args;
     ESP_ERROR_CHECK(esp_console_cmd_register(&cmd));
 }
 
@@ -205,13 +202,12 @@ static void register_light_sleep(void)
 {
     sleep_args.type             = arg_str1(NULL, NULL, "<type>", "light sleep mode: enable");
     sleep_args.end              = arg_end(2);
-    const esp_console_cmd_t cmd = {
-        .command  = "light_sleep",
-        .help     = "Config light sleep mode",
-        .hint     = NULL,
-        .func     = &cmd_do_light_sleep,
-        .argtable = &sleep_args,
-    };
+    esp_console_cmd_t cmd{};
+    cmd.command  = "light_sleep";
+    cmd.help     = "Config light sleep mode";
+    cmd.hint     = NULL;
+    cmd.func     = &cmd_do_light_sleep;
+    cmd.argtable = &sleep_args;
     ESP_ERROR_CHECK(esp_console_cmd_register(&cmd));
 }
 
@@ -265,7 +261,7 @@ static int do_ping_cmd(int argc, char** argv)
 {
     esp_ping_config_t config = ESP_PING_DEFAULT_CONFIG();
     config.task_stack_size   = 4096;
-    ip_addr_t target_addr    = {0};
+    ip_addr_t target_addr{};
 
     int nerrors = arg_parse(argc, argv, (void**) &ping_args);
     if (nerrors != 0)
@@ -295,11 +291,10 @@ static int do_ping_cmd(int argc, char** argv)
     // config.interface   = esp_netif_get_netif_impl_index(g_nan_netif);
 
     /* set callback functions */
-    esp_ping_callbacks_t cbs = {
-        .on_ping_success = cmd_ping_on_ping_success,
-        .on_ping_timeout = cmd_ping_on_ping_timeout,
-        .on_ping_end     = cmd_ping_on_ping_end,
-    };
+    esp_ping_callbacks_t cbs{};
+    cbs.on_ping_success = cmd_ping_on_ping_success;
+    cbs.on_ping_timeout = cmd_ping_on_ping_timeout;
+    cbs.on_ping_end     = cmd_ping_on_ping_end;
     esp_ping_handle_t ping;
     if (esp_ping_new_session(&config, &cbs, &ping) == ESP_OK)
     {
@@ -320,11 +315,12 @@ void register_ping_cmd(void)
     ping_args.host = arg_str1(NULL, NULL, "<host>", "Host address");
     ping_args.end  = arg_end(1);
 
-    const esp_console_cmd_t ping_cmd = {.command  = "ping",
-                                        .help     = "send ICMP ECHO_REQUEST to network hosts",
-                                        .hint     = NULL,
-                                        .func     = &do_ping_cmd,
-                                        .argtable = &ping_args};
+    esp_console_cmd_t ping_cmd{};
+    ping_cmd.command  = "ping";
+    ping_cmd.help     = "send ICMP ECHO_REQUEST to network hosts";
+    ping_cmd.hint     = NULL;
+    ping_cmd.func     = &do_ping_cmd;
+    ping_cmd.argtable = &ping_args;
 
     ESP_ERROR_CHECK(esp_console_cmd_register(&ping_cmd));
 }

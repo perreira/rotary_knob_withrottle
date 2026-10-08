@@ -32,8 +32,12 @@ static std::string url_decode(const std::string& in) {
     for (size_t i = 0; i < in.size(); ++i) {
         if (in[i] == '+') out += ' ';
         else if (in[i] == '%' && i + 2 < in.size()) {
-            auto hex = [](char c)->int{ if(c>='0'&&c<='9')return c-'0';
-                if(c>='a'&&c<='f')return c-'a'+10; if(c>='A'&&c<='F')return c-'A'+10; return 0; };
+            auto hex = [](char c) -> int {
+                if (c >= '0' && c <= '9') return c - '0';
+                if (c >= 'a' && c <= 'f') return c - 'a' + 10;
+                if (c >= 'A' && c <= 'F') return c - 'A' + 10;
+                return 0;
+            };
             out += (char)(hex(in[i+1]) * 16 + hex(in[i+2])); i += 2;
         } else out += in[i];
     }

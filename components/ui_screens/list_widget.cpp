@@ -3,6 +3,13 @@
 #include <new>
 #include <string>
 
+static constexpr lv_style_selector_t MAIN_DEFAULT_SELECTOR =
+    static_cast<lv_style_selector_t>(LV_PART_MAIN) |
+    static_cast<lv_style_selector_t>(LV_STATE_DEFAULT);
+static constexpr lv_style_selector_t MAIN_PRESSED_SELECTOR =
+    static_cast<lv_style_selector_t>(LV_PART_MAIN) |
+    static_cast<lv_style_selector_t>(LV_STATE_PRESSED);
+
 // Per-container state. Each list container (roster, recent) owns its own
 // callback + item copy, attached via the container's user_data. Module globals
 // were shared between both screens, so whichever populated last won — visiting
@@ -44,8 +51,8 @@ void list_widget_populate(lv_obj_t* container,
     // little top padding so the first row clears the top bar on opening.
     lv_obj_set_flex_align(container, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER,
                           LV_FLEX_ALIGN_CENTER);
-    lv_obj_set_style_pad_row(container, 10, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_pad_top(container, 14, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_row(container, 10, MAIN_DEFAULT_SELECTOR);
+    lv_obj_set_style_pad_top(container, 14, MAIN_DEFAULT_SELECTOR);
 
     uint32_t existing = lv_obj_get_child_cnt(container);
 
@@ -62,13 +69,13 @@ void list_widget_populate(lv_obj_t* container,
             btn = lv_btn_create(container);
             lv_obj_set_size(btn, 240, 56);
             lv_obj_clear_flag(btn, LV_OBJ_FLAG_SCROLLABLE);
-            lv_obj_set_style_radius(btn, 10, LV_PART_MAIN | LV_STATE_DEFAULT);
-            lv_obj_set_style_bg_color(btn, lv_color_hex(0x2C4A7E), LV_PART_MAIN | LV_STATE_DEFAULT);
-            lv_obj_set_style_bg_color(btn, lv_color_hex(0x3E66A8), LV_PART_MAIN | LV_STATE_PRESSED);
+            lv_obj_set_style_radius(btn, 10, MAIN_DEFAULT_SELECTOR);
+            lv_obj_set_style_bg_color(btn, lv_color_hex(0x2C4A7E), MAIN_DEFAULT_SELECTOR);
+            lv_obj_set_style_bg_color(btn, lv_color_hex(0x3E66A8), MAIN_PRESSED_SELECTOR);
             lbl = lv_label_create(btn);
             lv_obj_set_style_text_font(lbl, &lv_font_montserrat_20,
-                                       LV_PART_MAIN | LV_STATE_DEFAULT);
-            lv_obj_set_style_text_color(lbl, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
+                                       MAIN_DEFAULT_SELECTOR);
+            lv_obj_set_style_text_color(lbl, lv_color_hex(0xFFFFFF), MAIN_DEFAULT_SELECTOR);
             lv_obj_center(lbl);
             lv_obj_add_event_cb(btn, row_clicked, LV_EVENT_CLICKED, (void*) (intptr_t) i);
         }
@@ -120,11 +127,11 @@ int list_widget_focus(lv_obj_t* container, int focus, int delta, bool nested) {
         lv_obj_t* child = lv_obj_get_child(container, i);
         lv_obj_t* tgt   = nested ? lv_obj_get_child(child, 0) : child;
         if (!tgt) continue;
-        lv_obj_set_style_outline_width(tgt, (i == idx) ? 3 : 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+        lv_obj_set_style_outline_width(tgt, (i == idx) ? 3 : 0, MAIN_DEFAULT_SELECTOR);
         if (i == idx) {
-            lv_obj_set_style_outline_color(tgt, lv_color_hex(0xF1C40F), LV_PART_MAIN | LV_STATE_DEFAULT);
-            lv_obj_set_style_outline_opa(tgt, LV_OPA_COVER, LV_PART_MAIN | LV_STATE_DEFAULT);
-            lv_obj_set_style_outline_pad(tgt, 2, LV_PART_MAIN | LV_STATE_DEFAULT);
+            lv_obj_set_style_outline_color(tgt, lv_color_hex(0xF1C40F), MAIN_DEFAULT_SELECTOR);
+            lv_obj_set_style_outline_opa(tgt, LV_OPA_COVER, MAIN_DEFAULT_SELECTOR);
+            lv_obj_set_style_outline_pad(tgt, 2, MAIN_DEFAULT_SELECTOR);
         }
     }
     // Scroll the row one PAST the focused one (in the travel direction) into

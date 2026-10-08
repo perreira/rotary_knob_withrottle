@@ -1,5 +1,5 @@
 {
-  "idf.currentSetup": "/home/tmiller/.espressif/v5.5.3/esp-idf",
+  "idf.currentSetup": "/home/nils/.espressif/v6.1/esp-idf",
   "clangd.path": "${userHome}/.espressif/tools/esp-clang/esp-19.1.2_20250312/esp-clang/bin/clangd",
   "clangd.arguments": [
     "--background-index",
