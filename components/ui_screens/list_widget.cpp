@@ -83,7 +83,9 @@ void list_widget_populate(lv_obj_t* container,
         // Show the bare DCC address (no 'L'/'S' length prefix).
         const LocoRef& r = items[i];
         std::string    addr = std::to_string(r.address);
-        std::string    text = r.name.empty() ? addr : r.name + "  (" + addr + ")";
+        std::string    name = r.name;
+        if (name.size() > 12) name = name.substr(0, 9) + "...";
+        std::string    text = name.empty() ? addr : name + "  (" + addr + ")";
         lv_label_set_text(lbl, text.c_str());
     }
 
