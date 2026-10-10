@@ -35,7 +35,7 @@ static void style_circle_btn(lv_obj_t* btn, uint32_t colour, uint32_t colour_pre
 // Apply uniform label style (white, montserrat 20).
 static void style_btn_label(lv_obj_t* label)
 {
-    lv_obj_set_style_text_font(label,  &lv_font_montserrat_20, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(label,  &lv_font_dejavu_latin1_20, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_color(label, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
 }
 
@@ -94,7 +94,7 @@ static void enter()
                                     LV_PART_MAIN | LV_STATE_DEFAULT);
         lv_obj_t* home_lbl = lv_label_create(ui_Train_Main_Control_Back_Btn);
         lv_label_set_text(home_lbl, LV_SYMBOL_HOME);
-        lv_obj_set_style_text_font(home_lbl, &lv_font_montserrat_26,
+        lv_obj_set_style_text_font(home_lbl, &lv_font_dejavu_latin1_26,
                                    LV_PART_MAIN | LV_STATE_DEFAULT);
         lv_obj_set_style_text_color(home_lbl, lv_color_hex(0xE3E3E3),
                                     LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -140,7 +140,7 @@ static void enter()
 
     // ---- Battery label - top area, to the right of the back button ----
     s_battery_label = lv_label_create(ui_Train_Main_Control);
-    lv_obj_set_style_text_font(s_battery_label, &lv_font_montserrat_12,
+    lv_obj_set_style_text_font(s_battery_label, &lv_font_dejavu_latin1_12,
                                LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_color(s_battery_label, lv_color_hex(0xCCCCCC),
                                 LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -149,7 +149,7 @@ static void enter()
 
     // ---- Speed % readout, just below the train ID (which is at y=-81) ----
     s_speed_label = lv_label_create(ui_Train_Main_Control);
-    lv_obj_set_style_text_font(s_speed_label, &lv_font_montserrat_20, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(s_speed_label, &lv_font_dejavu_latin1_20, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_color(s_speed_label, lv_color_hex(0xCCCCCC), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_label_set_text(s_speed_label, "0%");
     lv_obj_align(s_speed_label, LV_ALIGN_CENTER, 0, -48);

@@ -84,7 +84,7 @@ void ui_Select_Train_Screen_screen_init(void)
     lv_obj_set_y(ui_Select_Train_Title_Label, 0);
     lv_obj_set_align(ui_Select_Train_Title_Label, LV_ALIGN_CENTER);
     lv_label_set_text(ui_Select_Train_Title_Label, "Select Train");
-    lv_obj_set_style_text_font(ui_Select_Train_Title_Label, &lv_font_montserrat_26, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_Select_Train_Title_Label, &lv_font_dejavu_latin1_26, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_Select_Trains_Panel = lv_obj_create(ui_Train_Select_Container);
     lv_obj_set_width(ui_Select_Trains_Panel, 370);
@@ -103,7 +103,7 @@ void ui_Select_Train_Screen_screen_init(void)
     lv_obj_set_height(ui_Train_Select_Label2, LV_SIZE_CONTENT);    /// 1
     lv_obj_set_align(ui_Train_Select_Label2, LV_ALIGN_CENTER);
     lv_label_set_text(ui_Train_Select_Label2, "Train Name");
-    lv_obj_set_style_text_font(ui_Train_Select_Label2, &lv_font_montserrat_20, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_Train_Select_Label2, &lv_font_dejavu_latin1_20, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     lv_obj_add_event_cb(ui_Select_Train_Back_Btn, ui_event_Select_Train_Back_Btn, LV_EVENT_ALL, NULL);
     uic_Select_Train_Screen = ui_Select_Train_Screen;

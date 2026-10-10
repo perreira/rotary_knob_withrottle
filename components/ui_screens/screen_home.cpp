@@ -60,7 +60,7 @@ static void enter() {
                                                LV_STYLE_TEXT_COLOR, _ui_theme_color_Standout);
         ui_object_set_themeable_style_property(recents_lbl, LV_PART_MAIN | LV_STATE_DEFAULT,
                                                LV_STYLE_TEXT_OPA, _ui_theme_alpha_Standout);
-        lv_obj_set_style_text_font(recents_lbl, &lv_font_montserrat_40, LV_PART_MAIN | LV_STATE_DEFAULT);
+        lv_obj_set_style_text_font(recents_lbl, &lv_font_dejavu_latin1_40, LV_PART_MAIN | LV_STATE_DEFAULT);
         lv_obj_center(recents_lbl);
         lv_obj_add_event_cb(recents_btn, go_recent, LV_EVENT_CLICKED, nullptr);
 
@@ -72,7 +72,7 @@ static void enter() {
 
         // --- Battery readout (top, above the Roster button) ---
         s_batt = lv_label_create(ui_Main_Screen);
-        lv_obj_set_style_text_font(s_batt, &lv_font_montserrat_20, LV_PART_MAIN | LV_STATE_DEFAULT);
+        lv_obj_set_style_text_font(s_batt, &lv_font_dejavu_latin1_20, LV_PART_MAIN | LV_STATE_DEFAULT);
         lv_obj_set_style_text_color(s_batt, lv_color_hex(0xE3E3E3), LV_PART_MAIN | LV_STATE_DEFAULT);
         lv_label_set_text(s_batt, LV_SYMBOL_BATTERY_FULL " --%");
         lv_obj_align(s_batt, LV_ALIGN_TOP_MID, 0, 24);

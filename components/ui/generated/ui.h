@@ -12,6 +12,11 @@ extern "C" {
 
 #include "lvgl.h"
 
+extern const lv_font_t lv_font_dejavu_latin1_12;
+extern const lv_font_t lv_font_dejavu_latin1_20;
+extern const lv_font_t lv_font_dejavu_latin1_26;
+extern const lv_font_t lv_font_dejavu_latin1_40;
+
 #include "ui_helpers.h"
 #include "ui_events.h"
 #include "ui_theme_manager.h"

@@ -11,6 +11,10 @@ idf_component_register(
     SRCS
         "display_init.cpp"
         "backlight_idle.cpp"
+        "../ui_screens/roster_font.c"
+        "../ui_screens/dejavu_latin1_12.c"
+        "../ui_screens/dejavu_latin1_26.c"
+        "../ui_screens/dejavu_latin1_40.c"
         ${UI_SRCS}
     REQUIRES
         lvgl

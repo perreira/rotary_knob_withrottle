@@ -40,13 +40,13 @@ static void enter() {
 
         lv_obj_t* name = lv_label_create(s_scr);
         lv_label_set_text(name, APP_NAME);
-        lv_obj_set_style_text_font(name, &lv_font_montserrat_26, LV_PART_MAIN | LV_STATE_DEFAULT);
+        lv_obj_set_style_text_font(name, &lv_font_dejavu_latin1_26, LV_PART_MAIN | LV_STATE_DEFAULT);
         lv_obj_set_style_text_color(name, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
         lv_obj_align(name, LV_ALIGN_CENTER, 0, -24);
 
         lv_obj_t* ver = lv_label_create(s_scr);
         lv_label_set_text(ver, resolve_version());
-        lv_obj_set_style_text_font(ver, &lv_font_montserrat_20, LV_PART_MAIN | LV_STATE_DEFAULT);
+        lv_obj_set_style_text_font(ver, &lv_font_dejavu_latin1_20, LV_PART_MAIN | LV_STATE_DEFAULT);
         lv_obj_set_style_text_color(ver, lv_color_hex(0xCCCCCC), LV_PART_MAIN | LV_STATE_DEFAULT);
         lv_obj_align(ver, LV_ALIGN_CENTER, 0, 14);
 
@@ -55,7 +55,7 @@ static void enter() {
         snprintf(buf, sizeof(buf), "build %s", desc ? desc->version : "?");
         lv_obj_t* build = lv_label_create(s_scr);
         lv_label_set_text(build, buf);
-        lv_obj_set_style_text_font(build, &lv_font_montserrat_12, LV_PART_MAIN | LV_STATE_DEFAULT);
+        lv_obj_set_style_text_font(build, &lv_font_dejavu_latin1_12, LV_PART_MAIN | LV_STATE_DEFAULT);
         lv_obj_set_style_text_color(build, lv_color_hex(0x808080), LV_PART_MAIN | LV_STATE_DEFAULT);
         lv_obj_align(build, LV_ALIGN_CENTER, 0, 54);
     }

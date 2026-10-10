@@ -72,7 +72,7 @@ void ui_Main_Screen_screen_init(void)
                                            _ui_theme_color_Standout);
     ui_object_set_themeable_style_property(ui_Select_Train_Btn_Label, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_TEXT_OPA,
                                            _ui_theme_alpha_Standout);
-    lv_obj_set_style_text_font(ui_Select_Train_Btn_Label, &lv_font_montserrat_40, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_Select_Train_Btn_Label, &lv_font_dejavu_latin1_40, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_Settings_Btn = lv_btn_create(ui_Main_Screen);
     lv_obj_set_width(ui_Settings_Btn, 380);
@@ -100,7 +100,7 @@ void ui_Main_Screen_screen_init(void)
                                            _ui_theme_color_Standout);
     ui_object_set_themeable_style_property(ui_Settings_Btn_Label, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_TEXT_OPA,
                                            _ui_theme_alpha_Standout);
-    lv_obj_set_style_text_font(ui_Settings_Btn_Label, &lv_font_montserrat_40, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_Settings_Btn_Label, &lv_font_dejavu_latin1_40, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     lv_obj_add_event_cb(ui_Select_Train_Btn, ui_event_Select_Train_Btn, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_Settings_Btn, ui_event_Settings_Btn, LV_EVENT_ALL, NULL);

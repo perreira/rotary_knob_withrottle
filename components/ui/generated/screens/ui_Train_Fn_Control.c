@@ -93,7 +93,7 @@ void ui_Train_Fn_Control_screen_init(void)
     lv_obj_set_y(ui_Fn_Train_Name, 0);
     lv_obj_set_align(ui_Fn_Train_Name, LV_ALIGN_CENTER);
     lv_label_set_text(ui_Fn_Train_Name, "Train Name");
-    lv_obj_set_style_text_font(ui_Fn_Train_Name, &lv_font_montserrat_26, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_Fn_Train_Name, &lv_font_dejavu_latin1_26, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     lv_obj_add_event_cb(ui_Select_Train_Back_Btn1, ui_event_Select_Train_Back_Btn1, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_Train_Fn_Control, ui_event_Train_Fn_Control, LV_EVENT_ALL, NULL);

@@ -57,14 +57,14 @@ static void enter() {
         lv_obj_set_style_bg_opa(home_btn, 150, LV_PART_MAIN | LV_STATE_PRESSED);
         lv_obj_t* home_lbl = lv_label_create(home_btn);
         lv_label_set_text(home_lbl, LV_SYMBOL_HOME);
-        lv_obj_set_style_text_font(home_lbl, &lv_font_montserrat_26, LV_PART_MAIN | LV_STATE_DEFAULT);
+        lv_obj_set_style_text_font(home_lbl, &lv_font_dejavu_latin1_26, LV_PART_MAIN | LV_STATE_DEFAULT);
         lv_obj_set_style_text_color(home_lbl, lv_color_hex(0xE3E3E3), LV_PART_MAIN | LV_STATE_DEFAULT);
         lv_obj_center(home_lbl);
         lv_obj_add_event_cb(home_btn, go_home, LV_EVENT_CLICKED, nullptr);
 
         lv_obj_t* title = lv_label_create(ui_Select_Train_Screen);
         lv_label_set_text(title, "Roster");
-        lv_obj_set_style_text_font(title, &lv_font_montserrat_26, LV_PART_MAIN | LV_STATE_DEFAULT);
+        lv_obj_set_style_text_font(title, &lv_font_dejavu_latin1_26, LV_PART_MAIN | LV_STATE_DEFAULT);
         lv_obj_set_style_text_color(title, lv_color_hex(0xE3E3E3), LV_PART_MAIN | LV_STATE_DEFAULT);
         lv_obj_align(title, LV_ALIGN_CENTER, 20, -138);
 

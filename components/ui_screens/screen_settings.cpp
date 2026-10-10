@@ -21,7 +21,7 @@ static void enter() {
         lv_obj_set_style_bg_img_opa(ui_Settings_Back_Btn, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
         lv_obj_t* home_lbl = lv_label_create(ui_Settings_Back_Btn);
         lv_label_set_text(home_lbl, LV_SYMBOL_HOME);
-        lv_obj_set_style_text_font(home_lbl, &lv_font_montserrat_26, LV_PART_MAIN | LV_STATE_DEFAULT);
+        lv_obj_set_style_text_font(home_lbl, &lv_font_dejavu_latin1_26, LV_PART_MAIN | LV_STATE_DEFAULT);
         lv_obj_set_style_text_color(home_lbl, lv_color_hex(0xE3E3E3), LV_PART_MAIN | LV_STATE_DEFAULT);
         lv_obj_center(home_lbl);
 

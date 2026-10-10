@@ -28,7 +28,7 @@ static void enter() {
         lv_obj_set_size(spin, 100, 100);
         lv_obj_align(spin, LV_ALIGN_CENTER, 0, -30);
         s_label = lv_label_create(s_scr);
-        lv_obj_set_style_text_font(s_label, &lv_font_montserrat_20, LV_PART_MAIN | LV_STATE_DEFAULT);
+        lv_obj_set_style_text_font(s_label, &lv_font_dejavu_latin1_20, LV_PART_MAIN | LV_STATE_DEFAULT);
         lv_obj_set_style_text_color(s_label, lv_color_hex(0xE3E3E3), LV_PART_MAIN | LV_STATE_DEFAULT);
         lv_obj_align(s_label, LV_ALIGN_CENTER, 0, 70);
     }

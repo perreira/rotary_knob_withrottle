@@ -98,7 +98,7 @@ void ui_Settings_Screen_screen_init(void)
     lv_obj_set_y(ui_Settings_Title_Label, 0);
     lv_obj_set_align(ui_Settings_Title_Label, LV_ALIGN_CENTER);
     lv_label_set_text(ui_Settings_Title_Label, "Settings");
-    lv_obj_set_style_text_font(ui_Settings_Title_Label, &lv_font_montserrat_26, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_Settings_Title_Label, &lv_font_dejavu_latin1_26, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_Panel3 = lv_obj_create(ui_Settings_Container);
     lv_obj_set_width(ui_Panel3, 370);

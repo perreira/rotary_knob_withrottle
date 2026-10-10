@@ -83,7 +83,7 @@ void TrainFnScreen::load_for_loco()
             lv_obj_set_align(label, LV_ALIGN_CENTER);
             lv_obj_set_width(label, LV_SIZE_CONTENT);
             lv_obj_set_height(label, LV_SIZE_CONTENT);
-            lv_obj_set_style_text_font(label, &lv_font_montserrat_20,
+            lv_obj_set_style_text_font(label, &lv_font_dejavu_latin1_20,
                                        LV_PART_MAIN | LV_STATE_DEFAULT);
             lv_obj_set_style_text_color(label, lv_color_hex(0xFFFFFF),
                                         LV_PART_MAIN | LV_STATE_DEFAULT);

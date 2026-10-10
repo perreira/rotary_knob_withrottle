@@ -25,7 +25,7 @@ static void build_if_needed() {
     lv_obj_set_style_bg_color(s_scr, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_t* title = lv_label_create(s_scr);
     lv_label_set_text(title, "Choose JMRI server");
-    lv_obj_set_style_text_font(title, &lv_font_montserrat_20, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(title, &lv_font_dejavu_latin1_20, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_color(title, lv_color_hex(0xE3E3E3), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_align(title, LV_ALIGN_TOP_MID, 0, 30);
     s_list = lv_obj_create(s_scr);

@@ -73,7 +73,7 @@ void list_widget_populate(lv_obj_t* container,
             lv_obj_set_style_bg_color(btn, lv_color_hex(0x2C4A7E), MAIN_DEFAULT_SELECTOR);
             lv_obj_set_style_bg_color(btn, lv_color_hex(0x3E66A8), MAIN_PRESSED_SELECTOR);
             lbl = lv_label_create(btn);
-            lv_obj_set_style_text_font(lbl, &lv_font_montserrat_20,
+            lv_obj_set_style_text_font(lbl, &lv_font_dejavu_latin1_20,
                                        MAIN_DEFAULT_SELECTOR);
             lv_obj_set_style_text_color(lbl, lv_color_hex(0xFFFFFF), MAIN_DEFAULT_SELECTOR);
             lv_obj_center(lbl);

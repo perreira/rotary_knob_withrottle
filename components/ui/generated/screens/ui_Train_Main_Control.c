@@ -108,7 +108,7 @@ void ui_Train_Main_Control_screen_init(void)
     lv_obj_set_y(ui_Train_Main_Name_Label, -81);
     lv_obj_set_align(ui_Train_Main_Name_Label, LV_ALIGN_CENTER);
     lv_label_set_text(ui_Train_Main_Name_Label, "Train Name");
-    lv_obj_set_style_text_font(ui_Train_Main_Name_Label, &lv_font_montserrat_26, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_Train_Main_Name_Label, &lv_font_dejavu_latin1_26, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_Train_Main_Control_Back_Btn = lv_btn_create(ui_Train_Main_Control);
     lv_obj_set_width(ui_Train_Main_Control_Back_Btn, 50);
@@ -143,7 +143,7 @@ void ui_Train_Main_Control_screen_init(void)
     lv_obj_set_height(ui_Train_Main_Fn_Btn_Label, LV_SIZE_CONTENT);    /// 1
     lv_obj_set_align(ui_Train_Main_Fn_Btn_Label, LV_ALIGN_CENTER);
     lv_label_set_text(ui_Train_Main_Fn_Btn_Label, "fn");
-    lv_obj_set_style_text_font(ui_Train_Main_Fn_Btn_Label, &lv_font_montserrat_26, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_Train_Main_Fn_Btn_Label, &lv_font_dejavu_latin1_26, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_Train_Main_Stop_Btn = lv_btn_create(ui_Train_Main_Control);
     lv_obj_set_width(ui_Train_Main_Stop_Btn, 100);
@@ -163,7 +163,7 @@ void ui_Train_Main_Control_screen_init(void)
     lv_obj_set_height(ui_Train_Main_Stop_Btn_Label1, LV_SIZE_CONTENT);    /// 1
     lv_obj_set_align(ui_Train_Main_Stop_Btn_Label1, LV_ALIGN_CENTER);
     lv_label_set_text(ui_Train_Main_Stop_Btn_Label1, "STOP");
-    lv_obj_set_style_text_font(ui_Train_Main_Stop_Btn_Label1, &lv_font_montserrat_26, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_Train_Main_Stop_Btn_Label1, &lv_font_dejavu_latin1_26, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_Train_Main_direction = lv_btn_create(ui_Train_Main_Control);
     lv_obj_set_width(ui_Train_Main_direction, 100);
@@ -185,7 +185,7 @@ void ui_Train_Main_Control_screen_init(void)
     lv_obj_set_y(ui_Train_Main_direction_label, 0);
     lv_obj_set_align(ui_Train_Main_direction_label, LV_ALIGN_CENTER);
     lv_label_set_text(ui_Train_Main_direction_label, "dir >");
-    lv_obj_set_style_text_font(ui_Train_Main_direction_label, &lv_font_montserrat_26, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_Train_Main_direction_label, &lv_font_dejavu_latin1_26, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     lv_obj_add_event_cb(ui_Train_Main_Control_Back_Btn, ui_event_Train_Main_Control_Back_Btn, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_Train_Main_Fn_Btn, ui_event_Train_Main_Fn_Btn, LV_EVENT_ALL, NULL);
