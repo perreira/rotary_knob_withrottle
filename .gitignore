@@ -11,3 +11,5 @@ build/
 # ESP-IDF managed components (downloaded at build time)
 managed_components/
 update_to_61.patch
+todo.md
+plan.md
