@@ -1,5 +1,7 @@
 Fork from [https://github.com/honzup/waveshare_withrottle_dial](https://github.com/honzup/waveshare_withrottle_dial)
 
+All changes here were done with AI (GitHub Copilot). Use at your own risk...
+
 # WiThrottle Dial
 
 A standalone, full single-loco JMRI WiThrottle throttle for the Waveshare ESP32-S3 Knob (360 × 360 round touch display). The dial connects directly to a JMRI WiThrottle server over Wi-Fi – browse the roster, acquire a loco, drive it with the rotary encoder around a 270° speed arc, change direction, sound the horn, toggle up to 32 functions, and emergency-stop. Recently driven locos are remembered in NVS across power cycles. Returning to the home screen automatically releases the loco.
@@ -32,6 +34,7 @@ It can be powered directly from the USB connection or via a battery. I am using 
 - **mDNS auto-discovery** – finds the JMRI WiThrottle server on the network (`_withrottle._tcp`) automatically, with a saved-IP fallback and a picker when several servers are present.
 - **On-device Wi-Fi/JMRI provisioning** – a SoftAP captive portal (`WiThrottle-Setup`); configure Wi-Fi and JMRI from a phone browser, no recompile or serial needed. Entered automatically on first boot / repeated Wi-Fi failure, or via **Settings → Reconfigure Wi-Fi**.
 - **Battery readout** – LiPo charge as an icon + % on the home and throttle screens (calibrated ADC on GPIO1, discharge‑curve mapping, charging indicator), refreshed every few seconds.
+- **Backlight Screen saver** turn off the backlight when no input for specific time. Backlight is turned on again with first touch or rotary input
 
 ## Navigation map
 
