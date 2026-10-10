@@ -1,3 +1,5 @@
+Fork from [https://github.com/honzup/waveshare_withrottle_dial](https://github.com/honzup/waveshare_withrottle_dial)
+
 # WiThrottle Dial
 
 A standalone, full single-loco JMRI WiThrottle throttle for the Waveshare ESP32-S3 Knob (360 × 360 round touch display). The dial connects directly to a JMRI WiThrottle server over Wi-Fi – browse the roster, acquire a loco, drive it with the rotary encoder around a 270° speed arc, change direction, sound the horn, toggle up to 32 functions, and emergency-stop. Recently driven locos are remembered in NVS across power cycles. Returning to the home screen automatically releases the loco.
