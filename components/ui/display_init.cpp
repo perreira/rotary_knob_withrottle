@@ -3,6 +3,7 @@
 // https://www.waveshare.com/wiki/ESP32-S3-Knob-Touch-LCD-1.8#Working_with_ESP-IDF
 
 #include <display_init.h>
+#include <atomic>
 #include "esp_lcd_panel_io.h"
 #include "esp_lcd_panel_vendor.h"
 #include "esp_lcd_panel_ops.h"
@@ -20,8 +21,33 @@
 #include "lcd_touch_bsp.h"
 #include "user_config.h"
 #include "lcd_bl_pwm_bsp.h"
+#include "backlight_idle.h"
 
 static const char* TAG = "display_init";
+static std::atomic<bool> s_first_frame_ready{false};
+static std::atomic<bool> s_touch_activity{false};
+static std::atomic<bool> s_backlight_asleep{false};
+
+bool display_take_first_frame_ready(void)
+{
+    return s_first_frame_ready.exchange(false, std::memory_order_acq_rel);
+}
+
+bool display_take_touch_activity(void)
+{
+    return s_touch_activity.exchange(false, std::memory_order_acq_rel);
+}
+
+bool display_backlight_is_asleep(void)
+{
+    return s_backlight_asleep.load(std::memory_order_acquire);
+}
+
+void display_set_backlight_enabled(bool enabled)
+{
+    setUpduty(enabled ? LCD_PWM_MODE_255 : LCD_PWM_MODE_0);
+    s_backlight_asleep.store(!enabled, std::memory_order_release);
+}
 
 #if CONFIG_LV_COLOR_DEPTH == 32
 #define LCD_BIT_PER_PIXEL (24)
@@ -283,7 +309,8 @@ static void example_lvgl_flush_cb(lv_disp_drv_t* drv, const lv_area_t* area, lv_
         static bool s_backlight_on = false;
         if (!s_backlight_on && (lv_disp_flush_is_last(drv) || flush_count >= 40))
         {
-            setUpduty(LCD_PWM_MODE_255);
+            display_set_backlight_enabled(true);
+            s_first_frame_ready.store(true, std::memory_order_release);
             s_backlight_on = true;
         }
     }
@@ -398,10 +425,13 @@ static void touch_reader_task(void* arg)
 static void screen_lvgl_touch_cb(lv_indev_drv_t* drv, lv_indev_data_t* data)
 {
     static touch_event_t last_event = {0, 0, LV_INDEV_STATE_RELEASED, true, 0};
+    static BacklightTouchGate touch_gate;
     touch_event_t        current_event;
+    data->continue_reading = false;
 
     // Try to get latest touch event from queue
-    if (xQueueReceive(touch_queue, &current_event, 0) == pdTRUE)
+    const bool got_event = xQueueReceive(touch_queue, &current_event, 0) == pdTRUE;
+    if (got_event)
     {
         last_event = current_event;
         // Check if queue has more events - tell LVGL to call us again immediately
@@ -413,9 +443,23 @@ static void screen_lvgl_touch_cb(lv_indev_drv_t* drv, lv_indev_data_t* data)
         last_event.state = LV_INDEV_STATE_RELEASED;
     }
 
+    const bool pressed = got_event && last_event.valid && last_event.state == LV_INDEV_STATE_PRESSED;
+    const bool released = got_event && (!last_event.valid || last_event.state == LV_INDEV_STATE_RELEASED);
+    if (pressed)
+    {
+        s_touch_activity.store(true, std::memory_order_release);
+    }
+
     data->point.x = last_event.x;
     data->point.y = last_event.y;
-    data->state   = last_event.state;
+    // Keep the wake press suppressed across repeated samples until release.
+    if (touch_gate.should_suppress(pressed, released, display_backlight_is_asleep()))
+    {
+        data->state = LV_INDEV_STATE_RELEASED;
+        return;
+    }
+
+    data->state = last_event.state;
 }
 
 static void example_increase_lvgl_tick(void* arg)

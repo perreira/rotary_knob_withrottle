@@ -10,7 +10,8 @@ INCLUDES=(-I"$UNITY"
           -Icomponents/horn_resolver/include
           -Icomponents/recents
           -Icomponents/jmri_discovery/include
-          -Icomponents/netprov/include)
+          -Icomponents/netprov/include
+          -Icomponents/ui)
 
 # Pure (ESP-IDF-free) component sources — included if they exist yet.
 PURE=()
@@ -18,7 +19,8 @@ for s in components/loco_ref/loco_ref.cpp \
          components/horn_resolver/horn_resolver.cpp \
          components/recents/recents_serialize.cpp \
          components/jmri_discovery/choose_server.cpp \
-         components/netprov/netprov_validation.cpp; do
+         components/netprov/netprov_validation.cpp \
+         components/ui/backlight_idle.cpp; do
   [ -f "$s" ] && PURE+=("$s")
 done
 

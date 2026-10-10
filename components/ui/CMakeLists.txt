@@ -10,6 +10,7 @@ list(FILTER UI_SRCS EXCLUDE REGEX "ui_events\\.c$")
 idf_component_register(
     SRCS
         "display_init.cpp"
+        "backlight_idle.cpp"
         ${UI_SRCS}
     REQUIRES
         lvgl

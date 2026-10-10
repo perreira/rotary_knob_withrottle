@@ -9,7 +9,6 @@
  * SPDX-License-Identifier: MIT
  * Copyright (c) 2026 John (honzup)
  */
-#include <atomic>
 #include <cstdio>
 
 #include "esp_err.h"
@@ -21,6 +20,7 @@
 #include "sdkconfig.h"
 
 #include "display_init.h"
+#include "backlight_idle.h"
 #include "ui.h"
 #include "user_config.h"
 #include "user_encoder_bsp.h"
@@ -39,9 +39,12 @@ namespace {
 
 const char *TAG = "main";
 
-// Encoder detents accumulate here (±50 per step) between UI ticks; written by
-// the encoder task, drained by the UI task.
-std::atomic<int> s_scroll{0};
+// Encoder input and sleep state share this short critical section so an event
+// is either handled before sleep or treated as the wake gesture after sleep.
+portMUX_TYPE s_input_mux = portMUX_INITIALIZER_UNLOCKED;
+int s_scroll = 0;
+bool s_encoder_activity_pending = false;
+bool s_backlight_asleep = false;
 
 // Milliseconds since boot.
 inline uint32_t now_ms() { return static_cast<uint32_t>(esp_timer_get_time() / 1000); }
@@ -51,6 +54,7 @@ inline uint32_t now_ms() { return static_cast<uint32_t>(esp_timer_get_time() / 1
 // that stays unavailable.
 void ui_update_task(void *)
 {
+    BacklightIdle backlight_idle;
     uint32_t lock_failures = 0;
     uint32_t lock_count    = 0;
 
@@ -65,8 +69,50 @@ void ui_update_task(void *)
 
             screen_mgr_tick();
 
-            const int rotation = s_scroll.exchange(0);
-            if (rotation != 0) {
+            BacklightAction backlight_action = BacklightAction::NONE;
+            bool was_asleep = false;
+            int rotation = 0;
+            const uint32_t current_time = now_ms();
+
+            portENTER_CRITICAL(&s_input_mux);
+            if (display_take_first_frame_ready()) {
+                backlight_action = backlight_idle.on_first_frame(current_time);
+            }
+
+            const bool touch_activity = display_take_touch_activity();
+            const bool input_activity = s_encoder_activity_pending || touch_activity;
+            s_encoder_activity_pending = false;
+            was_asleep = backlight_idle.is_asleep();
+            if (input_activity) {
+                const BacklightAction activity_action = backlight_idle.on_activity(current_time);
+                if (activity_action != BacklightAction::NONE) {
+                    backlight_action = activity_action;
+                }
+            }
+
+            if (!was_asleep) {
+                rotation = s_scroll;
+            }
+            s_scroll = 0;
+
+            const BacklightAction timeout_action = backlight_idle.tick(current_time);
+            if (timeout_action != BacklightAction::NONE) {
+                backlight_action = timeout_action;
+                s_backlight_asleep = true;
+            } else if (backlight_action == BacklightAction::TURN_ON) {
+                s_backlight_asleep = false;
+            }
+            portEXIT_CRITICAL(&s_input_mux);
+
+            // The LVGL lock serializes these writes with the first-frame flush.
+            if (backlight_action == BacklightAction::TURN_ON) {
+                display_set_backlight_enabled(true);
+            } else if (backlight_action == BacklightAction::TURN_OFF) {
+                display_set_backlight_enabled(false);
+            }
+
+            // A detent that woke the display is intentionally consumed.
+            if (!was_asleep && rotation != 0) {
                 screen_mgr_on_rotate(rotation);
             }
 
@@ -104,8 +150,15 @@ void encoder_task(void *)
     for (;;) {
         const EventBits_t bits =
             xEventGroupWaitBits(knob_even_, BIT_EVEN_ALL, pdTRUE, pdFALSE, pdMS_TO_TICKS(5000));
-        if (READ_BIT(bits, 0)) s_scroll += 50;
-        if (READ_BIT(bits, 1)) s_scroll -= 50;
+        if (bits != 0) {
+            portENTER_CRITICAL(&s_input_mux);
+            s_encoder_activity_pending = true;
+            if (!s_backlight_asleep) {
+                if (READ_BIT(bits, 0)) s_scroll += 50;
+                if (READ_BIT(bits, 1)) s_scroll -= 50;
+            }
+            portEXIT_CRITICAL(&s_input_mux);
+        }
     }
 }
 
