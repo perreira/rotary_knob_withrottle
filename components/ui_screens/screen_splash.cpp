@@ -6,19 +6,19 @@
 
 // App name + version shown on the startup splash. The version follows git tags:
 // ESP-IDF sets esp_app_desc.version from `git describe --tags --always --dirty`,
-// so at/after a v* tag it reads e.g. "v1.1" (or "v1.1-3-gabcd-dirty" when ahead).
+// so at/after a v* tag it reads e.g. "v1.2.1" (or "v1.2.1-3-gabcd-dirty" when ahead).
 // We show the bare tag on the version line and the full describe on the build
 // line. APP_VERSION is only the fallback for an untagged build (shows a bare
 // commit hash otherwise) — keep it in step with the latest tag.
 #define APP_NAME       "WiThrottle Dial"
-#define APP_VERSION    "v1.2"
+#define APP_VERSION    "v1.2.1"
 #define SPLASH_HOLD_US (2500000)  // 2.5 s
 
 static lv_obj_t* s_scr      = nullptr;
 static int64_t   s_enter_us = 0;
 
 // Resolve the display version from the git-tag-derived app version. Returns the
-// leading tag token (up to the first '-', e.g. "v1.1"); falls back to
+// leading tag token (up to the first '-', e.g. "v1.2.1"); falls back to
 // APP_VERSION when the build isn't from a v* tag (describe gives a bare hash).
 static const char* resolve_version() {
     static char ver[24];

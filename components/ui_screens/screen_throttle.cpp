@@ -245,7 +245,8 @@ static void on_rotate(int delta)
     if (nv < mn) nv = mn;
     if (nv > mx) nv = mx;
     lv_arc_set_value(ui_Train_Main_Throttle, nv);
-    withr::set_speed((uint8_t)(((nv - mn) * 100) / (mx - mn)));
+    const uint8_t percent = (uint8_t)(((nv - mn) * 100) / (mx - mn));
+    withr::set_speed(percent);
     s_last_speed_input_us = esp_timer_get_time();
 }
 

@@ -79,7 +79,15 @@ The encoder task reads rotational events and accumulates scroll deltas. The UI t
 
 The connection to JMRI is handled through the WiThrottle client and associated server discovery components. The UI builds a roster and recent-loco model from server data, then drives throttle state, direction, function toggles, horn control, and emergency stop commands.
 
-### 5. Persistence and recovery
+A reliability improvement in the protocol path is that queued commands are coalesced: repeated speed/direction/function updates collapse to the newest meaningful value, while EStop and explicit loco acquire/release commands remain high-priority and are not silently lost when the queue is full. This keeps the protocol traffic bounded during rapid knob motion without dropping important state changes.
+
+### 5. Roster caching and UI stability
+
+The roster is maintained as a cached, sorted snapshot in the client layer. The snapshot is invalidated only when the roster version changes, and the UI reads the snapshot rather than re-sorting and copying the roster data on each tick. This keeps the roster list stable while still updating when roster content changes.
+
+The list widgets themselves reuse child buttons instead of deleting and recreating LVGL objects during event-driven screens. That pattern avoids the unsafe destruction path that can corrupt LVGL event state when a list is repopulated from an event callback.
+
+### 6. Persistence and recovery
 
 The app stores preferences in NVS using the parameter system, keeps recent locomotives across reboots, and can recover gracefully if a Wi-Fi or JMRI session drops. The app falls back to a connecting-state flow and automatically returns when the connection is restored.
 

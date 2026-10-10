@@ -9,8 +9,8 @@
 // never let list_widget_populate clean it).
 static lv_obj_t* s_list = nullptr;
 static bool      s_wired = false;
-static uint32_t  s_last_count = 0;
-static int       s_focus = 0;   // active (highlighted) row index
+static std::string s_last_sig;
+static int         s_focus = 0;   // active (highlighted) row index
 
 static void on_pick(const LocoRef& r) {
     withr::acquire_loco(r.address, r.length);
@@ -78,13 +78,20 @@ static void enter() {
 
 static void tick() {
     if (!s_list) return;
-    // Repopulate when the roster size changes (entries stream in after connect).
+    // Refresh only when the roster content changes. The client already keeps a
+    // sorted snapshot, so the UI loop avoids repeated sort work and redundant
+    // list recreation while still updating when names or counts change.
     auto roster = withr::get_roster();
-    if (roster.size() != s_last_count) {
-        s_last_count = roster.size();
+    std::string sig;
+    sig.reserve(roster.size() * 16);
+    for (const auto &r : roster) {
+        sig += std::to_string(r.address) + ":" + r.length + ":" + r.name + "\n";
+    }
+    if (sig != s_last_sig) {
+        s_last_sig = sig;
         list_widget_populate(s_list, roster, on_pick);
         if (s_focus >= (int) roster.size()) s_focus = 0;
-        s_focus = list_widget_focus(s_list, s_focus, 0, false);  // re-apply highlight
+        s_focus = list_widget_focus(s_list, s_focus, 0, false);
     }
 }
 

@@ -25,12 +25,15 @@ It can be powered directly from the USB connection or via a battery. I am using 
 ## Features
 
 - **Roster browser** – lists the JMRI roster, sorted by name; the encoder scrolls the list.
+- **Cached roster snapshot** – the client keeps a stable sorted snapshot and rebuilds it only when the roster version changes, so the UI loop does not repeatedly churn or sort the same data.
 - **Recents** – the locos you have driven before, persisted in NVS and survive a power cycle.
 - **270° speed arc** – the encoder sweeps a circular speed arc; the JMRI throttle tracks it live.
 - **Direction** – toggle forward/reverse.
 - **32-function screen** – a scrolling list of named functions; tap to toggle each in JMRI.
 - **Horn** – a dedicated control; the horn function index is auto-detected from the loco's function labels (falls back to F2).
 - **Emergency stop** – immediate e-stop; the arc turns red.
+- **Coalesced command queue** – bursts of speed/direction/function updates are merged to keep the newest logical state while preserving high-priority EStop and loco acquire/release commands.
+- **Burst-safe encoder handling** – rapid detent bursts are collapsed into a single net delta so the UI task stays stable during fast knob turns.
 - **mDNS auto-discovery** – finds the JMRI WiThrottle server on the network (`_withrottle._tcp`) automatically, with a saved-IP fallback and a picker when several servers are present.
 - **On-device Wi-Fi/JMRI provisioning** – a SoftAP captive portal (`WiThrottle-Setup`); configure Wi-Fi and JMRI from a phone browser, no recompile or serial needed. Entered automatically on first boot / repeated Wi-Fi failure, or via **Settings → Reconfigure Wi-Fi**.
 - **Battery readout** – LiPo charge as an icon + % on the home and throttle screens (calibrated ADC on GPIO1, discharge‑curve mapping, charging indicator), refreshed every few seconds.
@@ -184,7 +187,7 @@ test/                – native Unity tests
 
 ## Versioning
 
-The splash shows the release version (from the latest `vX.Y` git tag) and a small build id (`git describe`) for traceability. To cut a release, tag it — `git tag -a v1.2 -m "…"` — and the next build picks it up automatically.
+The splash shows the release version (from the latest `vX.Y.Z` git tag) and a small build id (`git describe`) for traceability. To cut a release, tag it — for example, `git tag -a v1.2.1 -m "Release 1.2.1"` — and the next build picks it up automatically.
 
 ## Licence
 

@@ -7,6 +7,8 @@
 #   ./build.sh flash monitor            (USB flash then open serial monitor)
 #   ./build.sh monitor
 
+set -e
+
 OTA_IP="${2:-192.168.1.209}"
 ESPOTA=~/.platformio/packages/framework-arduinoespressif32/tools/espota.py
 
@@ -17,9 +19,24 @@ if [ "$1" = "ota" ]; then
     exit $?
 fi
 
-IDF_PATH=~/.platformio/packages/framework-espidf@src-c44434145e05010467d5d5a727b42ef9 \
-PATH=~/.platformio/packages/toolchain-xtensa-esp-elf/bin:~/.platformio/packages/tool-cmake/bin:~/.platformio/packages/tool-ninja:~/.espressif/idf_venv/bin:$PATH \
-IDF_PYTHON_ENV_PATH=~/.espressif/idf_venv \
-ESP_IDF_VERSION=5.3.2 \
-~/.espressif/idf_venv/bin/python \
-  ~/.platformio/packages/framework-espidf@src-c44434145e05010467d5d5a727b42ef9/tools/idf.py "$@"
+IDF_PATH="${IDF_PATH:-/home/nils/.espressif/v6.1/esp-idf}"
+if [ ! -d "$IDF_PATH" ]; then
+    echo "ESP-IDF not found at $IDF_PATH" >&2
+    exit 1
+fi
+
+IDF_TOOLS_PATH="${IDF_TOOLS_PATH:-/home/nils/.espressif}"
+IDF_PYTHON_ENV_PATH="${IDF_PYTHON_ENV_PATH:-/home/nils/.espressif/tools/python/v6.1/venv}"
+export IDF_PATH IDF_TOOLS_PATH IDF_PYTHON_ENV_PATH
+
+# Keep the legacy ESP-IDF default path in sync with the active toolchain
+# installation so export.sh can resolve the Python virtual environment.
+mkdir -p /home/nils/.espressif/python_env
+ln -sfn /home/nils/.espressif/tools/python/v6.1/venv /home/nils/.espressif/python_env/idf6.1_py3.12_env
+ln -sfn /home/nils/.espressif/tools/espidf.constraints.v6.1.txt /home/nils/.espressif/espidf.constraints.v6.1.txt
+# Source the official ESP-IDF environment so the correct toolchain, cmake, ninja,
+# and Python env are selected for this workspace.
+# shellcheck disable=SC1091
+. "$IDF_PATH/export.sh"
+
+exec "$IDF_PATH/tools/idf.py" "$@"

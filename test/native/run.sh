@@ -11,7 +11,8 @@ INCLUDES=(-I"$UNITY"
           -Icomponents/recents
           -Icomponents/jmri_discovery/include
           -Icomponents/netprov/include
-          -Icomponents/ui)
+          -Icomponents/ui
+          -Icomponents/withrottle_client)
 
 # Pure (ESP-IDF-free) component sources — included if they exist yet.
 PURE=()

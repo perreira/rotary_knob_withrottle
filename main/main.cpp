@@ -24,6 +24,7 @@
 #include "ui.h"
 #include "user_config.h"
 #include "user_encoder_bsp.h"
+#include "encoder_accumulator.h"
 
 #include "ConsoleCommands.h"
 #include "Param.h"
@@ -154,8 +155,9 @@ void encoder_task(void *)
             portENTER_CRITICAL(&s_input_mux);
             s_encoder_activity_pending = true;
             if (!s_backlight_asleep) {
-                if (READ_BIT(bits, 0)) s_scroll += 50;
-                if (READ_BIT(bits, 1)) s_scroll -= 50;
+                const bool cw = READ_BIT(bits, 0) != 0;
+                const bool ccw = READ_BIT(bits, 1) != 0;
+                s_scroll = encoder_accumulate(s_scroll, cw, ccw);
             }
             portEXIT_CRITICAL(&s_input_mux);
         }

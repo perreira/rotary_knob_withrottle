@@ -112,6 +112,25 @@ typedef struct
 } sta_connect_args_t;
 static sta_connect_args_t connect_args;
 
+static void copy_wifi_field(uint8_t* dst, size_t dst_size, const char* src)
+{
+    if (dst == nullptr || dst_size == 0)
+    {
+        return;
+    }
+
+    memset(dst, 0, dst_size);
+    if (src == nullptr)
+    {
+        return;
+    }
+
+    const size_t max_copy = dst_size - 1;
+    const size_t src_len  = strnlen(src, max_copy);
+    memcpy(dst, src, src_len);
+    dst[src_len] = '\0';
+}
+
 static int cmd_do_sta_connect(int argc, char** argv)
 {
     int nerrors = arg_parse(argc, argv, (void**) &connect_args);
@@ -123,15 +142,17 @@ static int cmd_do_sta_connect(int argc, char** argv)
     }
 
     wifi_config_t wifi_config{};
+    memset(&wifi_config, 0, sizeof(wifi_config));
     wifi_config.sta.scan_method = WIFI_ALL_CHANNEL_SCAN;
     wifi_config.sta.sort_method = WIFI_CONNECT_AP_BY_SIGNAL;
 
     const char* ssid = connect_args.ssid->sval[0];
-    memcpy((char*) wifi_config.sta.ssid, ssid, sizeof(wifi_config.sta.ssid));
-    const char* pass = connect_args.password->sval[0];
-    if (connect_args.password->count > 0)
+    copy_wifi_field(wifi_config.sta.ssid, sizeof(wifi_config.sta.ssid), ssid);
+
+    const char* pass = connect_args.password->count > 0 ? connect_args.password->sval[0] : nullptr;
+    if (pass != nullptr)
     {
-        memcpy((char*) wifi_config.sta.password, pass, sizeof(wifi_config.sta.password));
+        copy_wifi_field(wifi_config.sta.password, sizeof(wifi_config.sta.password), pass);
         wifi_config.sta.threshold.authmode = WIFI_AUTH_WEP;
     }
     if (connect_args.channel->count > 0)

@@ -22,6 +22,7 @@
 #include <vector>
 
 #include "SocketStream.h"
+#include "command_queue.h"
 #include "WiThrottleProtocol.h"
 #include "horn_resolver.h"
 #include "jmri_discovery.h"
@@ -76,14 +77,7 @@ inline WiThrottleProtocol &proto() { return *s_proto; }
 
 // ---- Commands posted from the UI task -------------------------------------
 
-struct Command {
-    enum Kind { Speed, Direction, EStop, Function, Acquire, Release } kind;
-    int  arg        = 0;      // speed step, direction (1=fwd/0=rev), or function index
-    bool on         = false;  // Function: desired state
-    int  address    = 0;      // Acquire: DCC address
-    char length     = 'L';    // Acquire: 'S' or 'L'
-    char throttle   = DEFAULT_MULTITHROTTLE;
-};
+using Command = withr::command_queue::Command;
 
 QueueHandle_t s_queue = nullptr;
 
@@ -100,6 +94,7 @@ std::atomic<bool> s_session_up{false};    // WiThrottle/TCP session established
 std::atomic<bool> s_roster_ready{false};  // at least one roster entry received
 std::atomic<bool> s_loco_wanted{false};   // a loco is selected (survives reconnects)
 std::atomic<int>  s_horn_fn{2};           // resolved horn index for the active loco
+std::atomic<int>  s_speed_step{-1};       // latest speed reported for the active loco
 
 // The currently-selected loco, remembered so the task can re-acquire it after a
 // reconnect. Only the client task writes these.
@@ -178,6 +173,31 @@ public:
         ESP_LOGI(TAG, "track power %d", static_cast<int>(state));
     }
 
+    void receivedSpeed(int speed) override
+    {
+        s_speed_step.store(speed);
+    }
+
+    void receivedSpeedMultiThrottle(char throttle, int speed) override
+    {
+        if (throttle == DEFAULT_MULTITHROTTLE || throttle == '0') {
+            s_speed_step.store(speed);
+        }
+    }
+
+    void receivedDirection(Direction dir) override
+    {
+        Guard g(s_roster_lock);
+        direction = dir;
+    }
+
+    void receivedDirectionMultiThrottle(char throttle, Direction dir) override
+    {
+        if (throttle != DEFAULT_MULTITHROTTLE) return;
+        Guard g(s_roster_lock);
+        direction = dir;
+    }
+
     void addressAdded(String address, String entry) override
     {
         addressAddedMultiThrottle(DEFAULT_MULTITHROTTLE, address, entry);
@@ -208,6 +228,7 @@ public:
         s_sel_address = num;
         s_sel_length  = len;
         s_loco_active = true;
+        s_speed_step  = -1;
         s_connected   = true;
     }
 
@@ -228,13 +249,14 @@ public:
                     break;
                 }
             }
+            mark_roster_dirty_locked();
+            rebuild_roster_snapshot_locked();
         }
         ESP_LOGI(TAG, "loco released %s", address.c_str());
         s_loco_active = false;
+        s_speed_step  = -1;
         s_connected   = false;
     }
-
-    void receivedDirection(Direction dir) override { direction = dir; }
 
     void receivedRosterEntry(int index, String name, int address, char length) override
     {
@@ -244,6 +266,8 @@ public:
             e.name       = name.c_str();
             e.length     = length;
             e.fns[0].name = "Light";  // FN0 is conventionally the headlight
+            mark_roster_dirty_locked();
+            rebuild_roster_snapshot_locked();
         }
         s_roster_ready = true;
         ESP_LOGI(TAG, "roster[%d] '%s' (%c%d)", index, name.c_str(), length, address);
@@ -283,8 +307,46 @@ public:
         if (e) e->fns[func].on = state;
     }
 
+    void mark_roster_dirty_locked()
+    {
+        roster_version += 1;
+        roster_dirty = true;
+    }
+
+    void rebuild_roster_snapshot_locked()
+    {
+        roster_snapshot.clear();
+        roster_snapshot.reserve(entries.size());
+        for (const auto &kv : entries) {
+            roster_snapshot.push_back(LocoRef{kv.first, kv.second.length, kv.second.name});
+        }
+        std::sort(roster_snapshot.begin(), roster_snapshot.end(), [](const LocoRef &a, const LocoRef &b) {
+            const std::string a_name = [&]() {
+                std::string s = a.name;
+                std::transform(s.begin(), s.end(), s.begin(), [](unsigned char c) {
+                    return static_cast<char>(std::tolower(c));
+                });
+                return s;
+            }();
+            const std::string b_name = [&]() {
+                std::string s = b.name;
+                std::transform(s.begin(), s.end(), s.begin(), [](unsigned char c) {
+                    return static_cast<char>(std::tolower(c));
+                });
+                return s;
+            }();
+            return a_name < b_name;
+        });
+        snapshot_version = roster_version;
+        roster_dirty    = false;
+    }
+
     Direction                 direction = Direction::Forward;
     std::map<int, LocoEntry>  entries;  // key = DCC address
+    std::vector<LocoRef>      roster_snapshot;
+    uint32_t                  roster_version = 0;
+    uint32_t                  snapshot_version = 0;
+    bool                      roster_dirty = true;
 };
 
 ClientDelegate s_delegate;
@@ -332,9 +394,15 @@ void apply_command(const Command &cmd)
         case Command::Speed:
             proto().setSpeed(cmd.throttle, cmd.arg);
             break;
-        case Command::Direction:
-            proto().setDirection(cmd.throttle, cmd.arg ? Forward : Reverse);
+        case Command::Direction: {
+            const Direction dir = cmd.arg ? Forward : Reverse;
+            {
+                Guard g(s_roster_lock);
+                s_delegate.direction = dir;
+            }
+            proto().setDirection(cmd.throttle, dir);
             break;
+        }
         case Command::EStop:
             ESP_LOGI(TAG, "emergency stop");
             proto().emergencyStop(cmd.throttle);
@@ -395,12 +463,19 @@ void client_task(void *)
         }
         ESP_LOGI(TAG, "WiThrottle session up");
 
+        TickType_t last_speed_query = 0;
         while (socket.connected()) {
             Command cmd;
             while (xQueueReceive(s_queue, &cmd, pdMS_TO_TICKS(50)) == pdTRUE) {
                 apply_command(cmd);
             }
             proto().check();  // pump RX + heartbeat
+
+            const TickType_t now = xTaskGetTickCount();
+            if (s_connected && now - last_speed_query >= pdMS_TO_TICKS(500)) {
+                proto().requestSpeed(DEFAULT_MULTITHROTTLE);
+                last_speed_query = now;
+            }
         }
 
         ESP_LOGW(TAG, "disconnected; retrying in 3s");
@@ -411,10 +486,32 @@ void client_task(void *)
     }
 }
 
-// Post a command to the client task; dropped silently if the queue is full.
+// Post a command to the client task. When bursts arrive, the newest command
+// wins for the same logical slot (speed/direction/function) while preserving
+// high-priority commands like EStop and explicit loco acquire/release.
 void post(const Command &cmd)
 {
-    if (s_queue) xQueueSend(s_queue, &cmd, 0);
+    if (s_queue == nullptr) return;
+
+    if (xQueueSend(s_queue, &cmd, 0) == pdTRUE) {
+        return;
+    }
+
+    std::vector<Command> queued;
+    queued.reserve(8);
+    Command item{};
+    while (xQueueReceive(s_queue, &item, 0) == pdTRUE) {
+        queued.push_back(item);
+    }
+
+    withr::command_queue::coalesce_add(queued, cmd);
+
+    for (const auto &queued_cmd : queued) {
+        if (xQueueSend(s_queue, &queued_cmd, 0) != pdTRUE) {
+            ESP_LOGW(TAG, "coalesced queue still full; dropped queued command kind=%d", queued_cmd.kind);
+            break;
+        }
+    }
 }
 
 }  // namespace
@@ -448,7 +545,7 @@ void client_start(void)
 std::optional<uint8_t> get_speed()
 {
     if (!is_connected()) return std::nullopt;
-    const int step = proto().getSpeed(DEFAULT_MULTITHROTTLE);
+    const int step = s_speed_step.load();
     if (step < 0 || step > kMaxSpeed) return std::nullopt;
     return step_to_percent(step);
 }
@@ -462,9 +559,11 @@ std::optional<Direction> get_direction()
 void set_speed(uint8_t percent)
 {
     if (percent > 100) percent = 100;
+    const uint8_t step = percent_to_step(percent);
+    s_speed_step = step;
     Command cmd;
     cmd.kind = Command::Speed;
-    cmd.arg  = percent_to_step(percent);
+    cmd.arg  = step;
     post(cmd);
 }
 
@@ -477,6 +576,10 @@ void emergency_stop(void)
 
 void set_direction(Direction dir)
 {
+    {
+        Guard g(s_roster_lock);
+        s_delegate.direction = dir;
+    }
     Command cmd;
     cmd.kind = Command::Direction;
     cmd.arg  = (dir == Direction::Forward) ? 1 : 0;
@@ -508,6 +611,12 @@ std::optional<std::string> get_function_name(uint8_t func)
 void set_function(uint8_t func, bool state)
 {
     if (func >= MAX_FUNCTIONS) return;
+    {
+        Guard g(s_roster_lock);
+        if (auto *e = s_delegate.onThrottle(DEFAULT_MULTITHROTTLE)) {
+            e->fns[func].on = state;
+        }
+    }
     Command cmd;
     cmd.kind = Command::Function;
     cmd.arg  = func;
@@ -554,22 +663,11 @@ bool roster_ready() { return s_roster_ready.load(); }
 
 std::vector<LocoRef> get_roster()
 {
-    std::vector<LocoRef> out;
-    {
-        Guard g(s_roster_lock);
-        out.reserve(s_delegate.entries.size());
-        for (const auto &kv : s_delegate.entries) {
-            out.push_back(LocoRef{kv.first, kv.second.length, kv.second.name});
-        }
+    Guard g(s_roster_lock);
+    if (s_delegate.roster_version != s_delegate.snapshot_version || s_delegate.roster_dirty) {
+        s_delegate.rebuild_roster_snapshot_locked();
     }
-    auto lower = [](std::string s) {
-        std::transform(s.begin(), s.end(), s.begin(),
-                       [](unsigned char c) { return std::tolower(c); });
-        return s;
-    };
-    std::sort(out.begin(), out.end(),
-              [&](const LocoRef &a, const LocoRef &b) { return lower(a.name) < lower(b.name); });
-    return out;
+    return s_delegate.roster_snapshot;
 }
 
 void acquire_loco(int address, char length)
